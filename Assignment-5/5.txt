@@ -1,0 +1,54 @@
+Step 1: Load data
+import pandas as pd
+from itertools import combinations
+data = pd.read_csv("Market_Basket_Optimisation.csv", header=None)
+
+
+# Step 2: Convert rows to list of transactions
+
+transactions = []
+for i in range(data.shape[0]):
+    transaction = [str(item) for item in data.iloc[i] if str(item) != 'nan']
+    transactions.append(transaction)
+
+
+# Step 3: Count single items
+item_counts = {}
+for transaction in transactions:
+    for item in transaction:
+        item_counts[item] = item_counts.get(item, 0) + 1
+
+
+# Step 4: Count item pairs
+pair_counts = {}
+for transaction in transactions:
+    for pair in combinations(transaction, 2):
+        pair_counts[pair] = pair_counts.get(pair, 0) + 1
+min_support = 3  # item/pair must appear at least 3 times
+frequent_items = {item:count for item,count in item_counts.items() if count >= min_support}
+frequent_pairs = {pair:count for pair,count in pair_counts.items() if count >= min_support}
+
+
+
+# Step 6: Generate simple association rules
+
+rules = []
+total_transactions = len(transactions)
+
+for (A, B), pair_count in frequent_pairs.items():
+    support = pair_count / total_transactions
+    confidence_A_to_B = pair_count / item_counts[A]
+    confidence_B_to_A = pair_count / item_counts[B]
+    
+    # Only print rules with confidence >= 0.5
+    if confidence_A_to_B >= 0.5:
+        rules.append((A, B, support, confidence_A_to_B))
+    if confidence_B_to_A >= 0.5:
+        rules.append((B, A, support, confidence_B_to_A))
+
+
+# Step 7: Display rules
+
+print("Some association rules:")
+for rule in rules[:10]:  # print first 10 rules
+    print(f"Rule: {rule[0]} -> {rule[1]}, Support: {rule[2]:.2f}, Confidence: {rule[3]:.2f}")

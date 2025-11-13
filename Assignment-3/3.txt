@@ -1,0 +1,75 @@
+step 1 
+
+import pandas as pd
+data = pd.read_csv("spam.csv", encoding='ISO-8859-1')
+data = data[['v1', 'v2']]     
+data.columns = ['Label', 'Message']
+print(data.head())
+
+step 2
+
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+data['Label'] = le.fit_transform(data['Label']) 
+print(data.head())
+
+
+step 3
+
+from sklearn.feature_extraction.text import CountVectorizer
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(data['Message'])
+y = data['Label']
+print("Feature matrix shape:", X.shape)
+print("Number of labels:", y.shape)
+
+
+step 4 
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+print("Training set shape:", X_train.shape)
+print("Test set shape:", X_test.shape)
+
+
+step 5
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+nb_model = MultinomialNB()
+nb_model.fit(X_train, y_train)
+y_pred_nb = nb_model.predict(X_test)
+print("Naive Bayes Accuracy:", accuracy_score(y_test, y_pred_nb))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_nb))
+print("Classification Report:\n", classification_report(y_test, y_pred_nb))
+
+
+step 6
+from sklearn.linear_model import LogisticRegression
+lr_model = LogisticRegression(max_iter=1000)
+lr_model.fit(X_train, y_train)
+y_pred_lr = lr_model.predict(X_test)
+print("Logistic Regression Accuracy:", accuracy_score(y_test, y_pred_lr))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_lr))
+print("Classification Report:\n", classification_report(y_test, y_pred_lr))
+
+step 7 
+from sklearn.model_selection import cross_val_score
+cv_nb = cross_val_score(nb_model, X, y, cv=5, scoring='accuracy')
+print("Naive Bayes CV Accuracy:", cv_nb.mean())
+cv_lr = cross_val_score(lr_model, X, y, cv=5, scoring='accuracy')
+print("Logistic Regression CV Accuracy:", cv_lr.mean())
+
+
+step 8
+from sklearn.model_selection import GridSearchCV
+param_nb = {'alpha':[0.1, 0.5, 1.0]}
+grid_nb = GridSearchCV(MultinomialNB(), param_nb, cv=5, scoring='accuracy')
+grid_nb.fit(X_train, y_train)
+print("Best NB params:", grid_nb.best_params_)
+print("Best NB CV Accuracy:", grid_nb.best_score_)
+param_lr = {'C':[0.01, 0.1, 1, 10]}
+grid_lr = GridSearchCV(LogisticRegression(max_iter=1000), param_lr, cv=5, scoring='accuracy')
+grid_lr.fit(X_train, y_train)
+print("Best LR params:", grid_lr.best_params_)
+print("Best LR CV Accuracy:", grid_lr.best_score_)
+
+

@@ -1,0 +1,63 @@
+
+Step 1
+
+import numpy as np
+import pandas as pd
+data = pd.read_csv("diabetes.csv")  
+X = data.iloc[:, :-1].values      
+y = data.iloc[:, -1].values.reshape(-1, 1)
+  
+
+# Step 2: Normalize features
+X = X / X.max(axis=0)
+
+
+# Step 3: Initialize network parameters
+input_neurons = X.shape[1]   
+hidden_neurons = 5           
+output_neurons = 1           
+lr = 0.1                     
+epochs = 1000
+
+
+step 4
+
+np.random.seed(42)
+W1 = np.random.randn(input_neurons, hidden_neurons)
+b1 = np.zeros((1, hidden_neurons))
+W2 = np.random.randn(hidden_neurons, output_neurons)
+b2 = np.zeros((1, output_neurons))
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+
+
+# Step 4: Train network
+for i in range(epochs):
+   
+    hidden_input = np.dot(X, W1) + b1
+    hidden_output = sigmoid(hidden_input)
+    final_input = np.dot(hidden_output, W2) + b2
+    output = sigmoid(final_input)
+    
+    
+    error = y - output
+    d_output = error * sigmoid_derivative(output)
+    d_hidden = d_output.dot(W2.T) * sigmoid_derivative(hidden_output)
+    W2 += hidden_output.T.dot(d_output) * lr
+    b2 += np.sum(d_output, axis=0, keepdims=True) * lr
+    W1 += X.T.dot(d_hidden) * lr
+    b1 += np.sum(d_hidden, axis=0, keepdims=True) * lr
+
+    if i % 100 == 0:
+        loss = np.mean(np.square(error))
+        print(f"Epoch {i}, Loss: {loss:.4f}")
+
+
+# Step 5: Predict
+predictions = output > 0.5
+accuracy = np.mean(predictions == y)
+print("Final Accuracy:", accuracy)

@@ -1,0 +1,40 @@
+
+Step 1 
+
+import pandas as pd
+data = pd.read_csv("Admission_Predict.csv")
+data['Admitted'] = data['Chance of Admit '].apply(lambda x: 1 if x >= 0.75 else 0)
+X = data[['GRE Score', 'CGPA']]
+y = data['Admitted']
+
+
+Step 2: Train-Test Split
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+Step 3: Build Simple Decision Tree
+
+from sklearn.tree import DecisionTreeClassifier
+simple_tree = DecisionTreeClassifier(max_depth=3, random_state=42)
+simple_tree.fit(X_train, y_train)
+y_pred = simple_tree.predict(X_test)
+
+
+Step 4: Evaluate the Simple Tree
+
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+
+Step 5: Visualize Simple Decision Tree
+
+from sklearn import tree
+import matplotlib.pyplot as plt
+plt.figure(figsize=(12,8))
+tree.plot_tree(simple_tree, feature_names=['GRE Score','CGPA'],
+               class_names=['Not Admitted','Admitted'], filled=True)
+plt.show()
